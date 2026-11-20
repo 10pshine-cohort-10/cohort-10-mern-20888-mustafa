@@ -5,7 +5,9 @@ import { logger } from './config/logger';
 app.listen(env.PORT, (error) => {
   if (error) {
     logger.error({ err: error }, 'Failed to start listening');
-    process.exit(1);
+    // set the exit code and return, so the logger can finish writing before the process ends
+    process.exitCode = 1;
+    return;
   }
   logger.info({ port: env.PORT }, 'API listening');
 });
