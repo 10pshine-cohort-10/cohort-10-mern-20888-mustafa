@@ -1,11 +1,15 @@
-import pinoHttp from 'pino-http';
+import pinoHttp, { type StdSerializedResults } from 'pino-http';
 import { logger } from '../config/logger';
 
 export const httpLogger = pinoHttp({
   logger,
   serializers: {
-    req: (req) => ({ id: req.id, method: req.method, url: req.url.split('?')[0] }),
-    res: (res) => ({ statusCode: res.statusCode }),
+    req: (req: StdSerializedResults['req']) => ({
+      id: req.id,
+      method: req.method,
+      url: req.url.split('?')[0],
+    }),
+    res: (res: StdSerializedResults['res']) => ({ statusCode: res.statusCode }),
   },
   customLogLevel: (_req, res, err) => {
     if (err || res.statusCode >= 500) return 'error';
