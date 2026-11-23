@@ -5,6 +5,7 @@ import { env } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
 import { httpLogger } from './middleware/httpLogger';
 import { notFound } from './middleware/notFound';
+import { authRouter } from './routes/auth';
 
 export const app = express();
 
@@ -16,6 +17,8 @@ app.use(express.json({ limit: '1mb' }));
 app.get('/api/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
+app.use('/api/auth', authRouter);
 
 app.use(notFound);
 app.use(errorHandler);
