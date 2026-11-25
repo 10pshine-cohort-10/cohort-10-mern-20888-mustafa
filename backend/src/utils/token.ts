@@ -19,3 +19,10 @@ export function signToken(userId: string): string {
     expiresIn: TOKEN_MAX_AGE_MS / 1000,
   });
 }
+
+// the same flags the cookie was set with, except maxAge, so the browser really removes it
+export const clearCookieOptions: CookieOptions = {
+  httpOnly: cookieOptions.httpOnly,
+  sameSite: cookieOptions.sameSite,
+  secure: cookieOptions.secure,
+};

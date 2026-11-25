@@ -1,10 +1,11 @@
 import { argon2id, hash, verify } from 'argon2';
 import { Router } from 'express';
 import { logger } from '../config/logger';
+import { getAuthUser, requireAuth } from '../middleware/requireAuth';
 import { User } from '../models/User';
 import { loginSchema, signupSchema } from '../schemas/auth';
 import { AppError } from '../utils/AppError';
-import { COOKIE_NAME, cookieOptions, signToken } from '../utils/token';
+import { COOKIE_NAME, clearCookieOptions, cookieOptions, signToken } from '../utils/token';
 
 export const authRouter = Router();
 
@@ -72,4 +73,15 @@ authRouter.post('/login', async (req, res) => {
       user: { id: user.id, username: user.username, email: user.email, createdAt: user.createdAt },
     },
   });
+});
+
+authRouter.get('/me', requireAuth, (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.status(200).json({ status: 'success', data: { user: getAuthUser(res) } });
+});
+
+// no login needed, so an expired session can still log out
+authRouter.post('/logout', (_req, res) => {
+  res.clearCookie(COOKIE_NAME, clearCookieOptions);
+  res.status(200).json({ status: 'success', message: 'Logged out' });
 });
