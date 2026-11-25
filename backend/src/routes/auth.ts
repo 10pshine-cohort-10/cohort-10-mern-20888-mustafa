@@ -1,6 +1,7 @@
 import { argon2id, hash, verify } from 'argon2';
 import { Router } from 'express';
 import { logger } from '../config/logger';
+import { loginLimiter, signupLimiter } from '../middleware/rateLimit';
 import { getAuthUser, requireAuth } from '../middleware/requireAuth';
 import { User } from '../models/User';
 import { loginSchema, signupSchema } from '../schemas/auth';
@@ -14,7 +15,7 @@ let dummyHash: Promise<string> | undefined;
 const getDummyHash = (): Promise<string> =>
   (dummyHash ??= hash('timing-dummy-password', { type: argon2id }));
 
-authRouter.post('/signup', async (req, res) => {
+authRouter.post('/signup', signupLimiter, async (req, res) => {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) {
     const message = [...new Set(parsed.error.issues.map((issue) => issue.message))].join('. ');
@@ -45,7 +46,7 @@ authRouter.post('/signup', async (req, res) => {
   }
 });
 
-authRouter.post('/login', async (req, res) => {
+authRouter.post('/login', loginLimiter, async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     throw new AppError(400, 'Enter your email and password');

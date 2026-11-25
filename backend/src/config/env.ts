@@ -8,6 +8,9 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   MONGODB_URI: z.string().regex(/^mongodb(\+srv)?:\/\//, 'must be a MongoDB connection string'),
   JWT_SECRET: z.string().min(32, 'must be at least 32 characters'),
+  RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().int().min(1).max(1440).default(15),
+  RATE_LIMIT_LOGIN_MAX: z.coerce.number().int().min(1).max(100000).default(10),
+  RATE_LIMIT_SIGNUP_MAX: z.coerce.number().int().min(1).max(100000).default(5),
 });
 
 const parsed = envSchema.safeParse(process.env);
