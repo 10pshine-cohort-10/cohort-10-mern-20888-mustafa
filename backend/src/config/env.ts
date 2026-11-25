@@ -7,6 +7,7 @@ const envSchema = z.object({
   CLIENT_ORIGIN: z.string().default('http://localhost:5173'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   MONGODB_URI: z.string().regex(/^mongodb(\+srv)?:\/\//, 'must be a MongoDB connection string'),
+  JWT_SECRET: z.string().min(32, 'must be at least 32 characters'),
 });
 
 const parsed = envSchema.safeParse(process.env);
