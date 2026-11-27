@@ -2,6 +2,7 @@ import type { Server } from 'node:http';
 import { app } from './app';
 import { connectDb, disconnectDb } from './config/db';
 import { env } from './config/env';
+import { User } from './models/User';
 import { logger } from './config/logger';
 
 // how long running requests get to finish before their connections are cut
@@ -49,8 +50,9 @@ function shutdown(server: Server, signal: NodeJS.Signals): void {
 async function start(): Promise<void> {
   try {
     await connectDb();
+    await User.init();
   } catch (err) {
-    logger.error({ err }, 'Failed to connect to MongoDB');
+    logger.error({ err }, 'Failed to initialize MongoDB');
     process.exitCode = 1;
     return;
   }
@@ -60,7 +62,9 @@ async function start(): Promise<void> {
       logger.error({ err: error }, 'Failed to start listening');
       // set the exit code and close the database, so nothing keeps the process alive
       process.exitCode = 1;
-      void disconnectDb();
+      void disconnectDb().catch((err: unknown) => {
+        logger.error({ err }, 'Failed to close the database connection');
+      });
       return;
     }
     logger.info({ port: env.PORT }, 'API listening');
