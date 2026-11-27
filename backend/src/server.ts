@@ -50,10 +50,22 @@ function shutdown(server: Server, signal: NodeJS.Signals): void {
 async function start(): Promise<void> {
   try {
     await connectDb();
+  } catch (err) {
+    logger.error({ err }, 'Failed to connect to MongoDB');
+    process.exitCode = 1;
+    return;
+  }
+
+  try {
     await User.init();
   } catch (err) {
-    logger.error({ err }, 'Failed to initialize MongoDB');
+    logger.error({ err }, 'Failed to initialize User indexes');
     process.exitCode = 1;
+    try {
+      await disconnectDb();
+    } catch (closeErr) {
+      logger.error({ err: closeErr }, 'Failed to close the database connection');
+    }
     return;
   }
 
