@@ -35,10 +35,12 @@ export const errorHandler = (
     }
   }
 
+  const path = req.originalUrl.split('?')[0];
+
   if (statusCode >= 500) {
-    logger.error({ err: error, method: req.method, url: req.originalUrl }, 'Request failed');
+    logger.error({ err: error, method: req.method, url: path }, 'Request failed');
   } else {
-    logger.warn({ statusCode, method: req.method, url: req.originalUrl }, message);
+    logger.warn({ statusCode, method: req.method, url: path }, message);
   }
 
   res.status(statusCode).json({ status: 'error', message });
